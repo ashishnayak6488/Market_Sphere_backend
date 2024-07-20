@@ -4,17 +4,19 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const app = express();
 const cors = require("cors");
+const path = require("path");
 
-app.use(express.json());
-app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://market-sphere-frontend.vercel.app/",
     credentials: true,
   })
 );
-app.use("/", express.static("uploads"));
-app.use("/", (req, res) => {
+app.use(express.json());
+app.use(cookieParser());
+
+app.use("/", express.static(path.join(__dirname, "./uploads")));
+app.use("/test", (req, res) => {
   res.send("Hello from Market Sphere Backend Team");
 });
 app.use(bodyParser.urlencoded({ extended: true }));
