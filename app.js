@@ -6,9 +6,17 @@ const app = express();
 const cors = require("cors");
 const path = require("path");
 
+//config
+
+if (process.env.NODE_ENV !== "PRODUCTION") {
+  require("dotenv").config({
+    path: "config/.env",
+  });
+}
+
 app.use(
   cors({
-    origin: "https://market-sphere-frontend.vercel.app/",
+    origin: "https://market-sphere-frontend.vercel.app",
     credentials: true,
   })
 );
@@ -20,14 +28,6 @@ app.use("/test", (req, res) => {
   res.send("Hello from Market Sphere Backend Team");
 });
 app.use(bodyParser.urlencoded({ extended: true }));
-
-//config
-
-if (process.env.NODE_ENV !== "PRODUCTION") {
-  require("dotenv").config({
-    path: "config/.env",
-  });
-}
 
 //import routes
 
