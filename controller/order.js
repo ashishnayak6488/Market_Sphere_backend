@@ -5,9 +5,7 @@ const Product = require("../model/product");
 const Event = require("../model/event");
 const ErrorHandler = require("../utils/ErrorHandler");
 const { isAuthenticated, isSeller, isAdmin } = require("../middleware/auth");
-
 const catchAsyncError = require("../middleware/catchAsyncError");
-
 const router = express.Router();
 
 //create new order
@@ -169,7 +167,7 @@ router.put(
       }
 
       async function updateSellerInfo(amount) {
-        const seller = await Shop.findById(req.seller._id);
+        const seller = await Shop.findById(req.seller.id);
         seller.availableBalance = amount;
 
         await seller.save();

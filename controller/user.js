@@ -1,48 +1,40 @@
 const express = require("express");
-
-const path = require("path");
-const { upload } = require("../multer");
 const User = require("../model/user");
+const router = express.Router();
+const cloudinary = require("cloudinary");
 const ErrorHandler = require("../utils/ErrorHandler");
-const fs = require("fs");
+const catchAsyncError = require("../middleware/catchAsyncError");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail");
-const catchAsyncError = require("../middleware/catchAsyncError");
-const user = require("../model/user");
 const sendToken = require("../utils/jwtToken");
 const { isAuthenticated, isAdmin } = require("../middleware/auth");
 
-const router = express.Router();
-
-router.post("/create-user", upload.single("file"), async (req, res, next) => {
+router.post("/create-user", async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, avatar } = req.body;
     const userEmail = await User.findOne({ email });
 
     if (userEmail) {
-      const filename = req.file.filename;
-      const filePath = `uploads/${filename}`;
-      fs.unlink(filePath, (err) => {
-        if (err) {
-          console.log(err);
-          res.status(500).json({ message: "Error in deleting the file" });
-        }
-      });
-      return next(new ErrorHandler("User Already exits", 400));
+      return next(new ErrorHandler("User already exists", 400));
     }
 
-    const filename = req.file.filename;
-    const fileUrl = path.join(filename);
+    const myCloud = await cloudinary.v2.uploader.upload(avatar, {
+      folder: "avatars",
+    });
 
     const user = {
       name: name,
       email: email,
       password: password,
-      avatar: fileUrl,
+      avatar: {
+        public_id: myCloud.public_id,
+        url: myCloud.secure_url,
+      },
     };
 
     const activationToken = createActivationToken(user);
     const activationUrl = `https://market-sphere-frontend.vercel.app/activation/${activationToken}`;
+    // const activationUrl = `http://localhost:3000/activation/${activationToken}`;
 
     try {
       await sendMail({
@@ -58,7 +50,7 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
       return next(new ErrorHandler(error.message, 500));
     }
   } catch (error) {
-    return next(new ErrorHandler(error.message, 500));
+    return next(new ErrorHandler(error.message, 400));
   }
 });
 
@@ -164,12 +156,13 @@ router.get(
 
 router.get(
   "/logout",
-  isAuthenticated,
   catchAsyncError(async (req, res, next) => {
     try {
       res.cookie("token", null, {
         expires: new Date(Date.now()),
         httpOnly: true,
+        sameSite: "none",
+        secure: true,
       });
 
       res.status(201).json({
@@ -182,7 +175,7 @@ router.get(
   })
 );
 
-//update user
+//update user info
 
 router.put(
   "/update-user-info",
@@ -225,23 +218,30 @@ router.put(
 router.put(
   "/update-avatar",
   isAuthenticated,
-  upload.single("image"),
   catchAsyncError(async (req, res, next) => {
     try {
-      const existsUser = await User.findById(req.user.id);
+      let existsUser = await User.findById(req.user.id);
+      if (req.body.avatar !== "") {
+        const imageId = existsUser.avatar.public_id;
 
-      const existAvatarPath = `uploads/${existsUser.avatar}`;
+        await cloudinary.v2.uploader.destroy(imageId);
 
-      fs.unlinkSync(existAvatarPath);
-      const fileUrl = path.join(req.file.filename);
+        const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+          folder: "avatars",
+          width: 150,
+        });
 
-      const user = await User.findByIdAndUpdate(req.user.id, {
-        avatar: fileUrl,
-      });
+        existsUser.avatar = {
+          public_id: myCloud.public_id,
+          url: myCloud.secure_url,
+        };
+      }
+
+      await existsUser.save();
 
       res.status(200).json({
         success: true,
-        user,
+        user: existsUser,
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
@@ -263,7 +263,7 @@ router.put(
       );
 
       if (sameTypeAddress) {
-        return next(new ErrorHandler(`${req.user.addressType} already exists`));
+        return next(new ErrorHandler(`${req.body.addressType} already exists`));
       }
 
       const existAddress = user.addresses.find(
@@ -407,6 +407,10 @@ router.delete(
       if (!user) {
         return next(new ErrorHandler("User Not find with this id", 400));
       }
+
+      const imageId = user.avatar.public_id;
+
+      await cloudinary.v2.uploader.destroy(imageId);
 
       await User.findByIdAndDelete(req.params.id);
 

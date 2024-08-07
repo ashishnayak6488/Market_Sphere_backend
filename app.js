@@ -4,7 +4,28 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const app = express();
 const cors = require("cors");
-const path = require("path");
+// const path = require("path");
+
+app.use(
+  cors({
+    origin: [
+      "https://market-sphere-frontend.vercel.app",
+      "http://localhost:3000",
+    ],
+    credentials: true,
+  })
+);
+
+app.use(express.json());
+app.use(cookieParser());
+
+// app.use("/", express.static(path.join(__dirname, "./uploads")));
+
+app.use("/test", (req, res) => {
+  res.send("Hello from Market Sphere Backend Team");
+});
+
+app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 
 //config
 
@@ -13,21 +34,6 @@ if (process.env.NODE_ENV !== "PRODUCTION") {
     path: "config/.env",
   });
 }
-
-app.use(
-  cors({
-    origin: "https://market-sphere-frontend.vercel.app",
-    credentials: true,
-  })
-);
-app.use(express.json());
-app.use(cookieParser());
-
-app.use("/", express.static(path.join(__dirname, "./uploads")));
-app.use("/test", (req, res) => {
-  res.send("Hello from Market Sphere Backend Team");
-});
-app.use(bodyParser.urlencoded({ extended: true }));
 
 //import routes
 

@@ -10,6 +10,13 @@ const shopSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, "Please enter shop email!"],
+    unique: true,
+  },
+
+  status: {
+    type: String,
+    enum: ["pending", "active"],
+    default: "pending",
   },
 
   password: {
@@ -18,41 +25,33 @@ const shopSchema = new mongoose.Schema({
     minLength: [4, "Password should be greater than 4 characters"],
     select: false,
   },
-  avatar: {
+
+  description: {
     type: String,
-    required: [true, "Please enter your avatar!"],
+    // required: true
+  },
+
+  address: {
+    type: String,
+    required: true,
   },
   phoneNumber: {
     type: Number,
     required: true,
   },
-
-  //   addresses: [
-  //     {
-  //       country: {
-  //         type: String,
-  //       },
-  //       city: {
-  //         type: String,
-  //       },
-  //       address1: {
-  //         type: String,
-  //       },
-  //       address2: {
-  //         type: String,
-  //       },
-  //       zipCode: {
-  //         type: Number,
-  //       },
-  //       addressType: {
-  //         type: String,
-  //       },
-  //     },
-  //   ],
-
-  address: {
+  role: {
     type: String,
-    required: true,
+    default: "seller",
+  },
+  avatar: {
+    public_id: {
+      type: String,
+      required: true,
+    },
+    url: {
+      type: String,
+      required: true,
+    },
   },
 
   zipCode: {
@@ -86,25 +85,7 @@ const shopSchema = new mongoose.Schema({
       },
     },
   ],
-  description: {
-    type: String,
-    // required: true
-  },
 
-  role: {
-    type: String,
-    default: "seller",
-  },
-  //   avatar: {
-  //     public_id: {
-  //       type: String,
-  //       required: true,
-  //     },
-  //     url: {
-  //       type: String,
-  //       required: true,
-  //     },
-  //   },
   createdAt: {
     type: Date,
     default: Date.now(),

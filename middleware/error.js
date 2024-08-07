@@ -1,5 +1,6 @@
-const { TokenExpiredError, JsonWebTokenError } = require("jsonwebtoken");
 const ErrorHandler = require("../utils/ErrorHandler");
+
+// const { TokenExpiredError, JsonWebTokenError } = require("jsonwebtoken");
 
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
@@ -19,13 +20,13 @@ module.exports = (err, req, res, next) => {
   }
 
   //wrong jwt error
-  if (err.name === JsonWebTokenError) {
+  if (err.name === "JsonWebTokenError") {
     const message = `Your URL is invalid please try again later`;
     err = new ErrorHandler(message, 400);
   }
 
   //wrong expired
-  if (err.name === TokenExpiredError) {
+  if (err.name === "TokenExpiredError") {
     const message = `Your Url is expired please try again later`;
     err = new ErrorHandler(message, 400);
   }

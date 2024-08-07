@@ -18,10 +18,6 @@ const userSchema = new mongoose.Schema({
     minLength: [4, "Password should be greater than 4 characters"],
     select: false,
   },
-  avatar: {
-    type: String,
-    required: [true, "Please enter your avatar!"],
-  },
   phoneNumber: {
     type: Number,
   },
@@ -51,16 +47,16 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "user",
   },
-  //   avatar: {
-  //     public_id: {
-  //       type: String,
-  //       required: true,
-  //     },
-  //     url: {
-  //       type: String,
-  //       required: true,
-  //     },
-  //   },
+  avatar: {
+    public_id: {
+      type: String,
+      required: true,
+    },
+    url: {
+      type: String,
+      required: true,
+    },
+  },
   createdAt: {
     type: Date,
     default: Date.now(),

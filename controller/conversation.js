@@ -1,15 +1,8 @@
 const express = require("express");
-
 const router = express.Router();
-
-const Product = require("../model/product");
-const Shop = require("../model/shop");
 const Conversation = require("../model/conversation");
-const { upload } = require("../multer");
 const catchAsyncError = require("../middleware/catchAsyncError");
 const ErrorHandler = require("../utils/ErrorHandler");
-const Event = require("../model/event");
-const fs = require("fs");
 const { isSeller, isAuthenticated } = require("../middleware/auth");
 
 //create new conversation

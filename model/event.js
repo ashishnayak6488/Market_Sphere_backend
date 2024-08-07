@@ -44,8 +44,14 @@ const eventSchema = new mongoose.Schema({
   },
   images: [
     {
-      type: String,
-      // required: [true , "Please enter your product price"]
+      public_id: {
+        type: String,
+        required: true,
+      },
+      url: {
+        type: String,
+        required: true,
+      },
     },
   ],
   shopId: {
