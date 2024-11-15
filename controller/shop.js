@@ -110,6 +110,7 @@ router.post(
 
       const activationToken = createActivationToken(pendingShop._id.toString());
       const activationUrl = `https://market-sphere-frontend.vercel.app/seller/activation/${activationToken}`;
+      // const activationUrl = `http://localhost:3000/seller/activation/${activationToken}`;
 
       try {
         await sendMail({
